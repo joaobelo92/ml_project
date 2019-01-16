@@ -102,3 +102,10 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+# training data
+data/
+textures/
+
+# mac 
+.DS_Store
