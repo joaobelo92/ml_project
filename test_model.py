@@ -37,7 +37,7 @@ def imshow(inp, title=None):
     plt.pause(0.001)  # pause a bit so that plots are updated
 
 
-def visualize_model(model, num_images=6):
+def visualize_model(model, num_images=8):
     was_training = model.training
     model.eval()
     images_so_far = 0
@@ -50,6 +50,7 @@ def visualize_model(model, num_images=6):
 
             outputs = model(inputs)
             _, preds = torch.max(outputs, 1)
+            print(outputs)
 
             for j in range(inputs.size()[0]):
                 images_so_far += 1

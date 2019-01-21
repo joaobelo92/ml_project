@@ -15,7 +15,7 @@ def degree_to_rad(d):
 # if ran on blender path has to be complete, e.g.:
 # Users/joaobelo/Desktop/ml_project
 dirpath = ""
-filename = "lack.obj"
+filename = "lack_updated.obj"
 filepath = os.path.join(dirpath, filename)
 
 # import obj file with filepath above
@@ -29,7 +29,7 @@ objs = bpy.data.objects
 # objs.remove(objs['Body2'], True)
 # objs.remove(objs['Body3'], True)
 # objs.remove(objs['Body4'], True)
-objs.remove(objs['Body5'], True)
+# objs.remove(objs['Body5'], True)
 obj_object = bpy.context.selected_objects
 
 # merge all the obj objects into one if applicable
@@ -90,7 +90,7 @@ camera = bpy.context.object
 scene.camera = camera
 objs.append(camera)
 
-# add three point lighting - might be interesting to randomize lightning position as well
+# add three point lighting - might be interesting to randomize lighstning position as well
 lamp_settings = [
     (5, 7.5, random.uniform(2, 3)),
     (-5, 7.5, random.uniform(2, 3)),
@@ -113,7 +113,7 @@ empty_parent = bpy.context.object
 for obj in objs:
     obj.parent = empty_parent
 
-out_dir = os.path.join(dirpath, 'data/blender/step_4')
+out_dir = os.path.join(dirpath, 'data/blender/step_5')
 if not os.path.exists(out_dir):
     os.makedirs(out_dir)
 
@@ -121,14 +121,14 @@ bpy.context.scene.render.resolution_percentage = 100
 bpy.context.scene.render.resolution_x = 512
 bpy.context.scene.render.resolution_y = 512
 bpy.context.scene.cycles.film_transparent = True
-bpy.context.scene.cycles.samples = 200
+bpy.context.scene.cycles.samples = 300
 
 
 def randomize_lighting():
     objs[1].data.node_tree.nodes["Emission"].inputs[1].default_value = random.uniform(300, 1000)
-    objs[2].data.node_tree.nodes["Emission"].inputs[1].default_value = random.uniform(100, 500)
-    objs[3].data.node_tree.nodes["Emission"].inputs[1].default_value = random.uniform(100, 1000)
-    objs[4].data.node_tree.nodes["Emission"].inputs[1].default_value = random.uniform(100, 300)
+    objs[2].data.node_tree.nodes["Emission"].inputs[1].default_value = random.uniform(200, 500)
+    objs[3].data.node_tree.nodes["Emission"].inputs[1].default_value = random.uniform(200, 1000)
+    objs[4].data.node_tree.nodes["Emission"].inputs[1].default_value = random.uniform(200, 300)
     objs[4].location = (random.uniform(0, 5), random.uniform(0, 5), random.uniform(0, 5))
     objs[5].data.node_tree.nodes["Emission"].inputs[1].default_value = random.uniform(0, 750)
 
@@ -136,9 +136,9 @@ def randomize_lighting():
 for i, settings in enumerate(camera_settings):
     camera.location = settings[0]
     camera.rotation_euler = settings[1]
-    for j in range(15):
+    for j in range(31):
         randomize_lighting()
         filename = 'data_camera_' + str(i) + '_pos_' + str(j) + '_state_' + str(current_state)
         bpy.context.scene.render.filepath = os.path.join(out_dir, filename)
         bpy.ops.render.render(write_still=True)
-        empty_parent.rotation_euler = (0, 0, degree_to_rad(22.5 * (j + 1)))
+        empty_parent.rotation_euler = (0, 0, degree_to_rad(11.25 * (j + 1)))
