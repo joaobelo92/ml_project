@@ -47,34 +47,14 @@ print(class_names)
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-
-# method that allows us to visualize the augmented data
-def imshow(inp, title=None):
-    """Imshow for Tensor."""
-    inp = inp.numpy().transpose((1, 2, 0))
-    mean = np.array([0.485, 0.456, 0.406])
-    std = np.array([0.229, 0.224, 0.225])
-    inp = std * inp + mean
-    inp = np.clip(inp, 0, 1)
-    plt.imshow(inp)
-    if title is not None:
-        plt.title(title)
-    plt.pause(0.001)  # pause a bit so that plots are updated
-
-
-# # Get a batch of training data
-# inputs, classes = next(iter(dataloaders['train']))
-#
-# # Make a grid from batch
-# out = torchvision.utils.make_grid(inputs)
-#
-# imshow(out, title=[class_names[x] for x in classes])
-
 def train_model(model, criterion, optimizer, scheduler, num_epochs=25):
     since = time.time()
 
     best_model_wts = copy.deepcopy(model.state_dict())
     best_acc = 0.0
+
+    epoch_train_loss_plot = []
+    epoch_val_loss_plot = []
 
     for epoch in range(num_epochs):
         print(f'Epoch {epoch}/{num_epochs}')
@@ -115,6 +95,10 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs=25):
                 running_corrects += torch.sum(preds == labels.data)
 
             epoch_loss = running_loss / dataset_sizes[phase]
+            if phase is 'train':
+                epoch_train_loss_plot.append(epoch_loss)
+            else:
+                epoch_val_loss_plot.append(epoch_loss)
             epoch_acc = running_corrects.double() / dataset_sizes[phase]
 
             print(f'{phase} loss: {epoch_loss:.4f} epoch acc: {epoch_acc:.4f}')
@@ -131,53 +115,39 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs=25):
     print(f'Best val acc: {best_acc:4f}')
 
     model.load_state_dict(best_model_wts)
-    return model
+    return (model, epoch_train_loss_plot, epoch_val_loss_plot)
 
 
-def visualize_model(model, num_images=6):
-    was_training = model.training
-    model.eval()
-    images_so_far = 0
-    fig = plt.figure()
+# load a resnet and reset final fully connected layer
+# model_ft = models.resnet50(pretrained=True)
+# num_features = model_ft.fc.in_features
+# model_ft.fc = nn.Linear(num_features, 5)
 
-    with torch.no_grad():
-        for i, (inputs, labels) in enumerate(dataloaders['val']):
-            inputs = inputs.to(device)
-            labels = labels.to(device)
-
-            outputs = model(inputs)
-            _, preds = torch.max(outputs, 1)
-
-            for j in range(inputs.size()[0]):
-                images_so_far += 1
-                ax = plt.subplot(num_images//2, 2, images_so_far)
-                ax.axis('off')
-                ax.set_title('predicted: {}'.format(class_names[preds[j]]))
-                imshow(inputs.cpu().data[j])
-
-                if images_so_far == num_images:
-                    model.train(mode=was_training)
-                    return
-        model.train(mode=was_training)
-
-
-# load a pretrained model and reset final fully connected layer
-model_ft = models.resnet18(pretrained=True)
-num_features = model_ft.fc.in_features
-model_ft.fc = nn.Linear(num_features, 5)
+# load a vgg model and reset final fully connected layer
+model_ft = models.vgg19(pretrained=True)
+num_features = model_ft.classifier[6].in_features
+features = list(model_ft.classifier.children())[:-1] 
+features.extend([nn.Linear(num_features, 5)])
+model_ft.classifier = nn.Sequential(*features)
 
 model_ft = model_ft.to(device)
 
 criterion = nn.CrossEntropyLoss()
 
-optimizer_ft = optim.SGD(model_ft.parameters(), lr=0.001, momentum=0.9)
+optimizer_ft = optim.SGD(model_ft.parameters(), lr=0.002, momentum=0.9)
 
 exp_lr_scheduler = lr_scheduler.StepLR(optimizer_ft, step_size=0.7, gamma=0.1)
 
-model_ft = train_model(model_ft, criterion, optimizer_ft, exp_lr_scheduler,
-                       num_epochs=25)
+num_epochs = 25
+model_ft, epoch_train_loss_plot, epoch_val_loss_plot = train_model(model_ft, criterion, optimizer_ft, exp_lr_scheduler,
+                       num_epochs=num_epochs)
 
-visualize_model(model_ft)
+plt.plot(epoch_train_loss_plot, label='train')
+plt.plot(epoch_val_loss_plot, label='val')
+plt.legend(loc='upper right')
+plt.xlabel('Epoch')
+plt.ylabel('Loss')
+plt.savefig('stages_loss_plot.png')
 
 torch.save(model_ft.state_dict(), 'stages_model_state_dict.pt')
 torch.save(model_ft, 'stages_model.pt')

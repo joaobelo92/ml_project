@@ -4,9 +4,9 @@ import os
 from os.path import isfile, join
 import random
 
-data_dir = "data/blender/step_5"
+data_dir = "data/blender/regular"
 aug_dir = "textures"
-out_dir = "data/augmented/step_5"
+out_dir = "data/augmented/regular"
 
 if not os.path.exists(out_dir):
     os.makedirs(out_dir)

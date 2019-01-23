@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from torchvision import datasets, transforms
 
-model = torch.load('model.pt')
+model = torch.load('stages_model.pt')
 model.eval()
 data_transforms = transforms.Compose([
         transforms.Resize(256),
@@ -12,13 +12,13 @@ data_transforms = transforms.Compose([
         transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
     ])
 
-data_dir = 'data/real/object/'
+data_dir = 'data/real/stages_new/'
 image_dataset = datasets.ImageFolder(data_dir, data_transforms)
 dataloader = torch.utils.data.DataLoader(image_dataset, batch_size=4,
                                          shuffle=True, num_workers=4)
 dataset_size = len(image_dataset)
-class_names = ['bed', 'chair', 'drawer', 'lack', 'lamp']
-# class_names = ['step_1', 'step_2', 'step_3', 'step_4', 'step_5']
+# class_names = ['bed', 'chair', 'drawer', 'lack', 'lamp']
+class_names = ['stage 0', 'stage 1', 'stage 2', 'stage 3', 'stage 4']
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
@@ -32,12 +32,13 @@ def imshow(inp, title=None):
     inp = std * inp + mean
     inp = np.clip(inp, 0, 1)
     plt.imshow(inp)
+    plt.savefig('res.png')
     if title is not None:
         plt.title(title)
     plt.pause(0.001)  # pause a bit so that plots are updated
 
 
-def visualize_model(model, num_images=8):
+def visualize_model(model, num_images=6):
     was_training = model.training
     model.eval()
     images_so_far = 0
@@ -56,7 +57,7 @@ def visualize_model(model, num_images=8):
                 images_so_far += 1
                 ax = plt.subplot(num_images//2, 2, images_so_far)
                 ax.axis('off')
-                ax.set_title('predicted: {}'.format(class_names[preds[j]]))
+                ax.set_title('predicted: {}'.format(class_names[preds[j]]), fontsize=10)
                 imshow(inputs.cpu().data[j])
 
                 if images_so_far == num_images:

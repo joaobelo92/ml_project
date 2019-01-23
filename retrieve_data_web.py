@@ -3,8 +3,8 @@ import os
 import shutil
 import concurrent.futures
 
-dataset_name = "drawer"
-dataset_id = "n03015254"
+dataset_name = "chair"
+dataset_id = "n03002096"
 f = requests.get(f"http://image-net.org/api/text/imagenet.synset.geturls?wnid={dataset_id}")
 dl_dir = f"data/image_net/{dataset_name}"
 

@@ -30,7 +30,7 @@ objs = bpy.data.objects
 # objs.remove(objs['Body3'], True)
 # objs.remove(objs['Body4'], True)
 # objs.remove(objs['Body5'], True)
-obj_object = bpy.context.selected_objects
+# obj_object = bpy.context.selected_objects
 
 # merge all the obj objects into one if applicable
 scene = bpy.context.scene
@@ -50,7 +50,7 @@ table_settings = [
     [(0.004, 0.004, 0.004), (degree_to_rad(180), 0, 0), (-1, 1.1, 0.2)],
 ]
 
-current_state = 1
+current_state = 0
 
 obj_object.scale = table_settings[current_state][0]
 obj_object.rotation_euler = table_settings[current_state][1]
@@ -113,7 +113,7 @@ empty_parent = bpy.context.object
 for obj in objs:
     obj.parent = empty_parent
 
-out_dir = os.path.join(dirpath, 'data/blender/step_5')
+out_dir = os.path.join(dirpath, 'data/blender/regular')
 if not os.path.exists(out_dir):
     os.makedirs(out_dir)
 
